@@ -1,0 +1,45 @@
+
+ARG RUST_VERSION=1.92.0
+
+FROM rust:${RUST_VERSION} AS rust-base
+
+FROM dalibo/buildpack:rockylinux8
+
+ARG PGRX_VERSION=0.16.1
+
+# Copy Rust toolchain from official image
+COPY --from=rust-base /usr/local/cargo /usr/local/cargo
+COPY --from=rust-base /usr/local/rustup /usr/local/rustup
+
+# Copy nfpm binary
+COPY --from=goreleaser/nfpm:latest /usr/bin/nfpm /usr/bin/nfpm
+
+# Set environment variables for Rust
+ENV CARGO_HOME=/usr/local/cargo
+ENV RUSTUP_HOME=/usr/local/rustup
+ENV PATH=/usr/local/cargo/bin:$PATH
+
+RUN dnf install -y 'dnf-command(config-manager)' \
+ && dnf config-manager -y --set-enabled powertools \
+ && dnf groupinstall -y 'Development Tools' \
+ && dnf install -y epel-release \
+ && dnf install -y \
+      cmake \
+      git \
+      clang \
+      bison-devel \
+      libicu-devel \
+      readline-devel \
+      zlib-devel \
+      openssl-devel \
+      ccache \
+      gettext \
+  && dnf clean all \
+  && rm -rf /var/cache/yum
+
+RUN rustup self update \
+ && rustup component add clippy llvm-tools-preview \
+ && cargo install grcov \
+ && cargo install --locked --version "${PGRX_VERSION}" cargo-pgrx
+
+
