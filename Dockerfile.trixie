@@ -1,0 +1,49 @@
+
+ARG RUST_VERSION=1.92.0
+
+FROM rust:${RUST_VERSION} AS rust-base
+
+FROM dalibo/buildpack:trixie
+
+ARG PGRX_VERSION=0.16.1
+
+# Copy Rust toolchain from official image
+COPY --from=rust-base /usr/local/cargo /usr/local/cargo
+COPY --from=rust-base /usr/local/rustup /usr/local/rustup
+
+# Copy nfpm binary
+COPY --from=goreleaser/nfpm:latest /usr/bin/nfpm /usr/bin/nfpm
+
+# Set environment variables for Rust
+ENV CARGO_HOME=/usr/local/cargo
+ENV RUSTUP_HOME=/usr/local/rustup
+ENV PATH=/usr/local/cargo/bin:$PATH
+
+RUN set -ex; \
+    apt-get update -y; \
+    apt-get install -y --no-install-recommends \
+        build-essential \
+        clang \
+        libclang-dev \
+        libreadline-dev \
+        zlib1g-dev \
+        flex \
+        bison \
+        libxml2-dev \
+        libxslt-dev \
+        libssl-dev \
+        libxml2-utils \
+        xsltproc \
+        ccache \
+        pkg-config \
+    ; \
+    apt-get clean; \
+    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*; \
+    :
+
+RUN rustup self update \
+ && rustup component add clippy llvm-tools-preview \
+ && cargo install grcov \
+ && cargo install --locked --version "${PGRX_VERSION}" cargo-pgrx
+
+
