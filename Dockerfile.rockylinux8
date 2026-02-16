@@ -39,7 +39,7 @@ RUN dnf install -y 'dnf-command(config-manager)' \
 
 RUN rustup self update \
  && rustup component add clippy llvm-tools-preview \
- && cargo install grcov cargo-cyclonedx \
+ && cargo install grcov cargo-cyclonedx uv \
  && cargo install --locked --version "${PGRX_VERSION}" cargo-pgrx
 
 
