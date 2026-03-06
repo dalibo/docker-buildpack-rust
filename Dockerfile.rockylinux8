@@ -19,11 +19,7 @@ ENV CARGO_HOME=/usr/local/cargo
 ENV RUSTUP_HOME=/usr/local/rustup
 ENV PATH=/usr/local/cargo/bin:$PATH
 
-RUN dnf install -y 'dnf-command(config-manager)' \
- && dnf config-manager -y --set-enabled powertools \
- && dnf groupinstall -y 'Development Tools' \
- && dnf install -y epel-release \
- && dnf install -y \
+RUN dnf install -y \
       cmake \
       git \
       clang \
