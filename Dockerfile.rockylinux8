@@ -23,7 +23,9 @@ RUN dnf install -y \
       cmake \
       git \
       clang \
+      bison \
       bison-devel \
+      flex \
       libicu-devel \
       readline-devel \
       zlib-devel \
