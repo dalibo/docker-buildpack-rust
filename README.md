@@ -9,3 +9,4 @@ Buildpack image for developing Rust PostgreSQL extensions:
 ## Tags
 
 - `trixie`
+- `rockylinux8`
