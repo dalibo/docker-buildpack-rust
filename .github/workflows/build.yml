@@ -33,8 +33,15 @@ jobs:
       - uses: actions/checkout@v7
 
       - name: Compute image name
-        id: image
-        run: echo "name=ghcr.io/$(echo "$GITHUB_REPOSITORY_OWNER" | tr '[:upper:]' '[:lower:]')/buildpack" >> "$GITHUB_OUTPUT"
+        env:
+          # Optional override: set a repository variable IMAGE_NAME
+          # (Settings → Secrets and variables → Actions → Variables)
+          IMAGE_NAME_OVERRIDE: ${{ vars.IMAGE_NAME }}
+        run: |
+          repo="${GITHUB_REPOSITORY#*/}"                           # dalibo/docker-buildpack-rust → docker-buildpack-rust
+          name="${IMAGE_NAME_OVERRIDE:-${repo#docker-}}"           # docker-buildpack-rust → buildpack-rust
+          owner="${GITHUB_REPOSITORY_OWNER,,}"                     # lowercase, ghcr.io requires it
+          echo "IMAGE=ghcr.io/${owner}/${name,,}" >> "$GITHUB_ENV" # IMAGE=ghcr.io/dalibo/buildpack-rust
 
       - uses: docker/setup-buildx-action@v4
 
@@ -54,7 +61,7 @@ jobs:
           platforms: linux/amd64
           pull: true
           push: ${{ env.PUSH == 'true' }}
-          tags: ${{ steps.image.outputs.name }}:${{ matrix.tag }}
+          tags: ${{ env.IMAGE }}:${{ matrix.tag }}
           labels: |
             org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
             org.opencontainers.image.revision=${{ github.sha }}
