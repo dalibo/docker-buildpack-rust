@@ -3,7 +3,7 @@ ARG RUST_VERSION=1.98.0
 
 FROM rust:${RUST_VERSION} AS rust-base
 
-FROM dalibo/buildpack:rockylinux8
+FROM ghcr.io/dalibo/buildpack:rockylinux8
 
 # Copy Rust toolchain from official image
 COPY --from=rust-base /usr/local/cargo /usr/local/cargo
