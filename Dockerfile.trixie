@@ -3,7 +3,7 @@ ARG RUST_VERSION=1.98.0
 
 FROM rust:${RUST_VERSION} AS rust-base
 
-FROM ghrc.io/dalibo/buildpack:trixie
+FROM ghcr.io/dalibo/buildpack:trixie
 
 # Copy Rust toolchain from official image
 COPY --from=rust-base /usr/local/cargo /usr/local/cargo
