@@ -1,5 +1,4 @@
 #!/bin/sh
-#
 
 rustup self update
 
@@ -11,5 +10,5 @@ cargo install --locked \
   cargo-audit@0.22.2 \
   cargo-deny@0.20.2 \
   cargo-cyclonedx@0.5.10 \
-  cargo-pgrx@0.19.3 \
+  cargo-pgrx@0.20.0-beta.1 \
   uv@0.13.7
