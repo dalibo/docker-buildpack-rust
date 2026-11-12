@@ -1,0 +1,52 @@
+
+ARG RUST_VERSION=1.99.1
+
+FROM rust:${RUST_VERSION} AS rust-base
+
+FROM ghcr.io/dalibo/buildpack:rockylinux9
+
+# Set by buildx: amd64, ppc64le, ...
+ARG TARGETARCH
+ARG NFPM_VERSION=2.49.0
+
+# Copy Rust toolchain from official image
+COPY --from=rust-base /usr/local/cargo /usr/local/cargo
+COPY --from=rust-base /usr/local/rustup /usr/local/rustup
+
+# Set environment variables for Rust
+ENV CARGO_HOME=/usr/local/cargo
+ENV RUSTUP_HOME=/usr/local/rustup
+ENV PATH=/usr/local/cargo/bin:$PATH
+
+# bison-devel lives in CRB
+RUN dnf install -y --enablerepo=crb \
+      cmake \
+      git \
+      clang \
+      bison \
+      bison-devel \
+      flex \
+      libicu-devel \
+      readline-devel \
+      zlib-devel \
+      openssl-devel \
+      ccache \
+      gettext \
+  && dnf clean all \
+  && rm -rf /var/cache/yum /var/cache/dnf
+
+# Install nfpm from release tarball: the goreleaser/nfpm image has no ppc64le variant
+RUN set -ex; \
+    case "${TARGETARCH:-$(uname -m)}" in \
+      amd64|x86_64) arch=x86_64 ;; \
+      arm64|aarch64) arch=arm64 ;; \
+      ppc64le) arch=ppc64le ;; \
+      s390x) arch=s390x ;; \
+      *) echo "Unsupported architecture: ${TARGETARCH}" >&2; exit 1 ;; \
+    esac; \
+    curl -fsSL "https://github.com/goreleaser/nfpm/releases/download/v${NFPM_VERSION}/nfpm_${NFPM_VERSION}_Linux_${arch}.tar.gz" \
+      | tar -xz -C /usr/bin nfpm; \
+    nfpm --version
+
+COPY install-pgrx.sh /tmp/
+RUN sh /tmp/install-pgrx.sh
