@@ -12,3 +12,5 @@ cargo install --locked \
   cargo-cyclonedx@0.5.10 \
   cargo-pgrx@0.20.0-beta.1 \
   uv@0.13.7
+
+cargo install --locked --features cli cargo-about@0.9.1
